@@ -1,0 +1,29 @@
+[
+  {
+    "groupName": "Гаражи",
+    "resourceIds": ["1","2"],
+    "contains": {
+      "price":"30000..80000",
+      "message":""
+    },
+    "color":"green"
+  },
+  {
+    "groupName": "Гаражи",
+    "resourceIds": ["2"],
+    "contains": {
+      "price": "30000..80000",
+      "message": "Полярная"
+    },
+    "color":"red"
+  },
+  {
+    "groupName": "Ноуты",
+    "resourceIds": ["3"],
+    "contains": {
+      "price":"5000..8000",
+      "message":""
+    },
+    "color":"green"
+  }
+]
