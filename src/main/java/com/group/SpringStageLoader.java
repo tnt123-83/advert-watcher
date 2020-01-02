@@ -3,11 +3,10 @@ package com.group;
 import com.group.dto.AdvertDto;
 import com.group.service.GenerateDataService;
 import com.group.service.ui.InteractionService;
+import com.group.util.HyperlinkCell;
+import javafx.application.HostServices;
 import javafx.application.Platform;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.ReadOnlyObjectWrapper;
-import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
@@ -22,7 +21,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 import javafx.util.Duration;
@@ -39,7 +37,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -52,6 +49,8 @@ public class SpringStageLoader implements ApplicationContextAware {
     private static final int WIDTH = 1000;
     private static final int HEIGHT = 600;
     private static final String ADVERTS = "Adverts";
+
+    private static HostServices hostServices;
 
     private static HBox columnsBox = new HBox();
     private static HBox bottomBox = new HBox();
@@ -78,14 +77,13 @@ public class SpringStageLoader implements ApplicationContextAware {
 
     private static ApplicationContext staticContext;
 
-    public Stage loadMain() {
-        Stage stage = new Stage();
+    public Stage loadMain(Stage stage) {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
         stage.setTitle(ADVERTS);
         stage.setScene(scene);
         stage.show();
         stage.setScene(scene);
-
+        hostServices = (HostServices)stage.getProperties().get("hostServices");
         configureColumnA();
         configureColumnB();
         configureBottomB();
@@ -165,6 +163,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         // столбец
         TableColumn<AdvertDto, String> idColumn = new TableColumn<>("Id");
         idColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getId()));
+        idColumn.prefWidthProperty().set(50);
 
         // столбец
         TableColumn<AdvertDto, Boolean> isViewedColumn = new TableColumn<>("Viewed");
@@ -197,22 +196,29 @@ public class SpringStageLoader implements ApplicationContextAware {
             });
             return advert.getViewed();
         });
+        isViewedColumn.prefWidthProperty().set(50);
 
         // столбец
-        TableColumn<AdvertDto, Integer> linkColumn = new TableColumn<>("Link");
-        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getUrl()));
+        TableColumn<AdvertDto, Hyperlink> linkColumn = new TableColumn<>("Link");
+        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(new Hyperlink(v.getValue().getUrl())));
+        HyperlinkCell.setHostServices(hostServices);
+        linkColumn.setCellFactory(new HyperlinkCell());
+        linkColumn.prefWidthProperty().set(120);
 
         // столбец
         TableColumn<AdvertDto, Integer> priceColumn = new TableColumn<>("Price");
         priceColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getPrice()));
+        priceColumn.prefWidthProperty().set(70);
 
         // столбец
         TableColumn<AdvertDto, Integer> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getDescription()));
+        descriptionColumn.prefWidthProperty().set(80);
 
         // столбец
         TableColumn<AdvertDto, Integer> textColumn = new TableColumn<>("Text");
         textColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getText()));
+        textColumn.prefWidthProperty().set(300);
 
         t.getColumns().addAll(numberCol, idColumn, isViewedColumn, linkColumn, priceColumn, descriptionColumn, textColumn);
     }
@@ -286,7 +292,6 @@ public class SpringStageLoader implements ApplicationContextAware {
         CheckBox observation = new CheckBox();
         observation.setOnAction(actionEvent -> {
             if (observation.isSelected()) {
-
 
             } else {
 

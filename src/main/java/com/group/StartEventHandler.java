@@ -70,7 +70,11 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
             while (c.next()) {
                 for (AdvertDto additem : c.getAddedSubList()) {
                     if (mapTabNameToItems.containsKey(additem.getFilter().getGroupName())) {
-                        mapTabNameToItems.get(additem.getFilter().getGroupName()).add(0, additem);
+                        if (additem.getViewed().getValue()) {
+                            mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);
+                        } else {
+                            mapTabNameToItems.get(additem.getFilter().getGroupName()).add(0, additem);
+                        }
                     } else {
                         createTabWithNameAndAddToMap(additem.getFilter().getGroupName(), mapTabNameToItems, tabs);
                         mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);

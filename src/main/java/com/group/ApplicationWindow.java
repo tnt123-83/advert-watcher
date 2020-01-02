@@ -2,6 +2,7 @@ package com.group;
 
 import com.group.service.GenerateDataService;
 import javafx.application.Application;
+import javafx.application.HostServices;
 import javafx.stage.Stage;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -23,7 +24,8 @@ public class ApplicationWindow extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        context.getBean(SpringStageLoader.class).loadMain().show();
+        primaryStage.getProperties().put("hostServices", this.getHostServices());
+        context.getBean(SpringStageLoader.class).loadMain(primaryStage).show();
     }
 
     @Override
