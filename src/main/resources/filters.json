@@ -19,11 +19,29 @@
   },
   {
     "groupName": "Ноуты",
-    "resourceIds": ["3"],
+    "resourceIds": ["6", "7", "8", "9"],
     "contains": {
-      "price":"5000..8000",
+      "price":"7000..11000",
       "message":""
     },
     "color":"green"
+  },
+  {
+    "groupName": "Память",
+    "resourceIds": ["4"],
+    "contains": {
+      "price": "900..1300",
+      "message": ""
+    },
+    "color":"red"
+  },
+  {
+    "groupName": "Память",
+    "resourceIds": ["5"],
+    "contains": {
+      "price": "1900..2800",
+      "message": ""
+    },
+    "color":"red"
   }
 ]

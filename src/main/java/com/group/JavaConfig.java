@@ -11,7 +11,9 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
@@ -28,10 +30,10 @@ public class JavaConfig {
     private static final String PROP_DATABASE_PASSWORD = "db.password";
     private static final String PROP_DATABASE_URL = "db.url";
     private static final String PROP_DATABASE_USERNAME = "db.username";
-    private static final String PROP_HIBERNATE_DIALECT = "db.hibernate.dialect";
-    private static final String PROP_HIBERNATE_SHOW_SQL = "db.hibernate.show_sql";
-    private static final String PROP_ENTITYMANAGER_PACKAGES_TO_SCAN = "db.entitymanager.packages.to.scan";
-    private static final String PROP_HIBERNATE_HBM2DDL_AUTO = "db.hibernate.hbm2ddl.auto";
+    private static final String PROP_HIBERNATE_DIALECT = "hibernate.dialect";
+    private static final String PROP_HIBERNATE_SHOW_SQL = "hibernate.show_sql";
+    private static final String PROP_ENTITYMANAGER_PACKAGES_TO_SCAN = "entitymanager.packages.to.scan";
+    private static final String PROP_HIBERNATE_HBM2DDL_AUTO = "hibernate.hbm2ddl.auto";
 
     @Resource
     private Environment env;
@@ -73,5 +75,12 @@ public class JavaConfig {
         PropertiesFactoryBean bean = new PropertiesFactoryBean();
         bean.setLocation(new ClassPathResource("run.properties"));
         return bean;
+    }
+
+    @Bean
+    public PlatformTransactionManager transactionManager(){
+        JpaTransactionManager transactionManager = new JpaTransactionManager();
+        transactionManager.setEntityManagerFactory(entityManagerFactory().getObject());
+        return transactionManager;
     }
 }

@@ -1,6 +1,7 @@
 package com.group;
 
 import com.group.dto.AdvertDto;
+import com.group.service.AdvertService;
 import com.group.service.GenerateDataService;
 import com.group.service.ui.InteractionService;
 import javafx.collections.FXCollections;
@@ -23,17 +24,17 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
     private final TabPane tabs;
     private TextArea output;
     private GenerateDataService service;
-    private InteractionService uiService;
+    private AdvertService advertService;
     private PartialResultsTask workingTask;
     private final Map<String, ObservableList<AdvertDto>> mapTabNameToItems = new HashMap<>();
 
-    StartEventHandler(Button button, ImageView progressGif, TabPane tabs, TextArea output, InteractionService uiService,
+    StartEventHandler(Button button, ImageView progressGif, TabPane tabs, TextArea output, AdvertService advertService,
                       GenerateDataService service) {
         this.button = button;
         this.progressGif = progressGif;
         this.tabs = tabs;
         this.output = output;
-        this.uiService = uiService;
+        this.advertService = advertService;
         this.service = service;
     }
 
@@ -69,6 +70,14 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
         workingTask.getPartialResults().addListener((ListChangeListener<AdvertDto>) c -> {
             while (c.next()) {
                 for (AdvertDto additem : c.getAddedSubList()) {
+                    additem.getSave().addListener((observable, oldValue, newValue) -> {
+                        additem.getSave().setValue(newValue.booleanValue());
+                        advertService.update(additem, newValue.booleanValue());
+                    });
+                    additem.getViewed().addListener((observable, oldValue, newValue) -> {
+                        additem.getViewed().setValue(newValue.booleanValue());
+                    });
+
                     if (mapTabNameToItems.containsKey(additem.getFilter().getGroupName())) {
                         if (additem.getViewed().getValue()) {
                             mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);

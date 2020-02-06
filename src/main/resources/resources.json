@@ -1,10 +1,15 @@
 [
   {
     "id":"1",
-    "url":"https://www.olx.ua/nedvizhimost/garazhy-parkovki/prodazha-garazhey-parkovok/garazh/kharkov/?search%5Border%5D=filter_float_price%3Aasc&search%5Bdistrict_id%5D=67&page=1",
+    "url":"https://www.olx.ua/nedvizhimost/garazhy-parkovki/prodazha-garazhey-parkovok/kharkov/?search%5Border%5D=filter_float_price%3Aasc&search%5Bdistrict_id%5D=67",
     "locators": {
-      "links": "table[id=offers_table] tr td table tr td[class=title-cell] a",
-      "link-container": "href",
+      "preview-container": "table[id=offers_table] tr td table",
+      "preview-link": "tr td[class=title-cell] a",
+      "preview-link-attr": "href",
+      "preview-title": "td[class=title-cell] a",
+      "preview-price" : "tr td[class*=td-price] p[class=price]",
+      "preview-location" : "tr td[class=bottom-cell] small:nth-child(1) span",
+      "preview-date" : "tr td[class=bottom-cell] small:nth-child(2) span",
       "nextPage": "a[data-cy=page-link-next]",
       "nextPage-container": "href",
       "siteId": "div[class=offer-titlebox__details] small",
@@ -32,40 +37,56 @@
   },
   {
     "id":"3",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/noutbuki/q-8130u/?search%5Border%5D=filter_float_price%3Aasc",
-    "locators":{
-      "links":"table[id=offers_table] tr td table tr td[class=title-cell] a",
-      "link-container":"href",
-      "nextPage":"a[data-cy=page-link-next]",
-      "nextPage-container":"href",
-      "siteId":"div[class=offer-titlebox__details] small",
-      "siteId-container":"text",
-      "siteId-details":"regexp: ",
-      "title":"div[class=offer-titlebox] h1",
-      "title-container":"text",
-      "description":"div[class=offer-titlebox__details] a[class=show-map-link]",
-      "description-container":"text",
-      "text":"div[id=textContent]",
-      "text-container":"text",
-      "price":"div[class=price-label]",
-      "price-container":"text",
-      "price-details":"regexp: \\D*(\\d+[\\d|\\s]*\\d*\\$?)\\D*",
-      "date":"div[class=offer-titlebox__details] em",
-      "date-container":"text",
-      "date-details":"regexp: ",
-      "location":"div[class=offer-titlebox__details] a[class=show-map-link]",
-      "location-container":"text",
-      "location-details":"regexp: ",
-      "fromAgent":"div[class=clr descriptioncontent marginbott20]",
-      "fromAgent-container":"text",
-      "fromAgent-details":"regexp:"
-    }
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/noutbuki/q-8130u/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"4",
+    "parentId":"1",
+    "url":"https://www.olx.ua/list/q-ddr4-16gb-%D0%BD%D0%BE%D1%83%D1%82%D0%B1%D1%83%D0%BA/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"5",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-32-ddr4/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"6",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8250U/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"7",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8350U/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"8",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8550U/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"9",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8565U/?search%5Border%5D=filter_float_price%3Aasc"
+  },
+  {
+    "id":"10",
+    "parentId":"1",
+    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8565U/?search%5Border%5D=filter_float_price%3Aasc"
   },
   {
     "id":"2",
-    "url":"https://besplatka.ua/kharkov/nedvizhimost/prodazha-garazhey-i-avtomest/shevchenkovskii-r-n/page/1?sort=price-z-a",
+    "url":"https://besplatka.ua/kharkov/nedvizhimost/prodazha-garazhey-i-avtomest/shevchenkovskii-r-n?sort=price-z-a",
     "prefix":"https://besplatka.ua",
     "locators":{
+      "preview-container":"div[class=messages-list] div[class=msg-one]",
+      "preview-link":"a[class=w-image]",
+      "preview-link-attr":"href",
+      "preview-price":"div[class=w-body] p[class*=m-price]",
+      "preview-title":"div[class=w-body] a[class=m-title]",
+      "preview-location":"div[class=w-body] ul[class*=m-attr] li[class*=m-region]",
+      "preview-date":"div[class=w-body] ul[class*=m-attr] li[class*=m-date]",
       "links":"div[class=messages-list] div[class=msg-one] div[class=fl-100 d-title] a[href]",
       "link-container":"href",
       "nextPage":"li[class=next] a[data-page]",

@@ -14,8 +14,9 @@ import java.util.Date;
 @Entity
 @Table(name = "ADVERT")
 public class Advert {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue
     @Column(name = "ID", unique = true, nullable = false, length = 20)
     private Long id;
 
@@ -45,6 +46,12 @@ public class Advert {
 
     @Column(name = "FROM_AGENT")
     private String fromAgent;
+
+    @Column(name = "VIEWED")
+    private boolean viewed;
+
+    @Column(name = "SAVE")
+    private boolean save;
 
     public Advert(Long id) {
         this.id = id;

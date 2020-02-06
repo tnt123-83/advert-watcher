@@ -56,9 +56,9 @@ public class GenerateDataServiceImpl implements GenerateDataService {
                     parseAndFilterDataFromResourceWithParams(true, false, true, res);
                 }
                 //if (!isWorkingTaskCancelled) {
-                    foundAdverts.clear();
-                    foundAdverts.addAll(tempFoundAdverts);
-                    tempFoundAdverts.clear();
+                foundAdverts.clear();
+                foundAdverts.addAll(tempFoundAdverts);
+                tempFoundAdverts.clear();
                 //}
                 latch.countDown();
             }
@@ -106,7 +106,21 @@ public class GenerateDataServiceImpl implements GenerateDataService {
             e.printStackTrace();
         }
         System.out.println("Array is: " + resources);
+        fillResourceParamsWithParentParams(resources);
         return resources;
+    }
+
+    private void fillResourceParamsWithParentParams(List<Resource> resources) {
+        Map<Long, Resource> idToResourceMap = resources.stream().collect(Collectors.toMap(Resource::getId, r -> r));
+        resources.stream()
+                .filter(r -> r.getParentId() != 0)
+                .forEach(r -> copyParamsFromParent(r, idToResourceMap));
+    }
+
+    private void copyParamsFromParent(Resource r, Map<Long, Resource> idToResourceMap) {
+        Map<String, String> locators = new HashMap<>(idToResourceMap.get(r.getParentId()).getLocators());
+        locators.putAll(r.getLocators());
+        r.setLocators(locators);
     }
 
     public List<String> getResultTablesNames() {
@@ -195,6 +209,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     }
 
     private boolean processDoesTextSatisfyCondition(String value, String condition) {
+        if ("skip!".equals("value")) return true;
         if (condition.trim().startsWith("regexp: ")) {
             String regexp = condition.replace("regexp: ", "");
             Pattern p = Pattern.compile(regexp);
@@ -225,22 +240,11 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     private void parseAndFilterDataFromResourceWithParams(boolean shouldSaveResults, boolean shouldReturnOnlyNewResults,
                                                           boolean shouldReturnNotViewedResults, Resource res) {
         Set<String> links = new HashSet<>();
-        String link = res.getUrl();
+        //Map<String, String> linkToPriceMap = new HashMap<>();
         try {
-            while (true) {
-                if (isWorkingTaskCancelled) break;
-                Document doc = Jsoup.connect(link).get();
-                links.addAll(doc.select(res.getLocators().get("links"))
-                        .stream()
-                        .map(e -> res.getPrefix() + e.attr(res.getLocators().get("link-container")))
-                        .collect(Collectors.toSet()));
-                Element nextPage = doc.select(res.getLocators().get("nextPage")).first();
-                if (nextPage != null && nextPage.hasAttr(res.getLocators().get("nextPage-container"))) {
-                    link = res.getPrefix() + nextPage.attr(res.getLocators().get("nextPage-container"));
-                } else {
-                    break;
-                }
-            }
+            boolean isPrefiltrationEnabled = true;
+            links = getLinksFromPage(isPrefiltrationEnabled, res);
+
             for (String url : links) {
                 if (isWorkingTaskCancelled) break;
                 AdvertDto advert = generateAdvertByLink(url, res.getLocators());
@@ -270,6 +274,43 @@ public class GenerateDataServiceImpl implements GenerateDataService {
         }
     }
 
+    private Set<String> getLinksFromPage(boolean isPrefiltrationEnabled, Resource res) throws IOException {
+        Set<String> result = new HashSet<>();
+        String link = res.getUrl();
+        while (true) {
+            if (isWorkingTaskCancelled) break;
+            Document doc = Jsoup.connect(link).get();
+            if (isPrefiltrationEnabled) {
+                for (Element e : doc.select(res.getLocators().get("preview-container"))) {
+                    AdvertDto a = new AdvertDto();
+                    a.setUrl(res.getPrefix()
+                            + e.selectFirst(res.getLocators().get("preview-link")).attr(res.getLocators().get("preview-link-attr")));
+                    a.setPrice(parseValue(res.getLocators().get("preview-price"), "text", res.getLocators().get("price-details"), e));
+                    //a.setPrice(e.selectFirst(res.getLocators().get("preview-price")).text());
+                    //a.setPrice(applyDetailsRegExp(e.selectFirst(res.getLocators().get("preview-price")).text(), res));
+                    a.setLocation(e.selectFirst(res.getLocators().get("preview-location")).text());
+                    a.setDescription("skip!");
+                    //a.setDate(e.selectFirst(res.getLocators().get("preview-price")).text());
+                    if (filterData(res.getFilters(), a)) {
+                        result.add(a.getUrl());
+                    }
+                }
+            } else {
+                result.addAll(doc.select(res.getLocators().get("preview-container") + " " + res.getLocators().get("preview-link"))
+                    .stream()
+                    .map(e -> res.getPrefix() + e.attr(res.getLocators().get("preview-link-attr")))
+                    .collect(Collectors.toSet()));
+            }
+            Element nextPage = doc.select(res.getLocators().get("nextPage")).first();
+            if (nextPage != null && nextPage.hasAttr(res.getLocators().get("nextPage-container"))) {
+                link = res.getPrefix() + nextPage.attr(res.getLocators().get("nextPage-container"));
+            } else {
+                break;
+            }
+        }
+        return result;
+    }
+
     private AdvertDto generateAdvertByLink(String link, Map<String, String> locators) {
         AdvertDto result = new AdvertDto();
         Document doc;
@@ -293,7 +334,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
         return result;
     }
 
-    private String parseValue(String locator, String container, String details, Document doc) {
+    private String parseValue(String locator, String container, String details, Element doc) {
         String result = "";
         if (locator != null && !locator.isEmpty() && container != null && !container.isEmpty()) {
             if ("text".equalsIgnoreCase(container)) {
@@ -307,18 +348,24 @@ public class GenerateDataServiceImpl implements GenerateDataService {
                         .map(e -> e.attr(container))
                         .findFirst().orElse("");
             }
-            if (details != null && details.contains("regexp:") && !details.replace("regexp:", "").trim().isEmpty()) {
-                Pattern p = Pattern.compile(details.replace("regexp:", "").trim());
-                Matcher m = p.matcher(result);
-                result = "";
-                if (m.find()) {
-                    for (int i = 1; i <= m.groupCount(); i++) {
-                        result += m.group(i) + (m.groupCount() > 1 && i < m.groupCount() ? ", " : "");
-                    }
+            result = applyDetailsRegExp(result, details);
+        }
+
+        return result;
+    }
+
+    private String applyDetailsRegExp(String str, String details) {
+        String result = str;
+        if (details != null && details.contains("regexp:") && !details.replace("regexp:", "").trim().isEmpty()) {
+            Pattern p = Pattern.compile(details.replace("regexp:", "").trim());
+            Matcher m = p.matcher(str);
+            result = "";
+            if (m.find()) {
+                for (int i = 1; i <= m.groupCount(); i++) {
+                    result += m.group(i) + (m.groupCount() > 1 && i < m.groupCount() ? ", " : "");
                 }
             }
         }
-
         return result;
     }
 

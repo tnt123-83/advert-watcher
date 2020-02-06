@@ -1,6 +1,7 @@
 package com.group;
 
 import com.group.dto.AdvertDto;
+import com.group.service.AdvertService;
 import com.group.service.GenerateDataService;
 import com.group.service.ui.InteractionService;
 import com.group.util.HyperlinkCell;
@@ -48,6 +49,8 @@ public class SpringStageLoader implements ApplicationContextAware {
 
     private static final int WIDTH = 1000;
     private static final int HEIGHT = 600;
+    private static final double OPACITY = 0.3;
+
     private static final String ADVERTS = "Adverts";
 
     private static HostServices hostServices;
@@ -67,15 +70,16 @@ public class SpringStageLoader implements ApplicationContextAware {
     private StartEventHandler startEventHandler;
 
     @Autowired
-    private GenerateDataService service;
+    private GenerateDataService generateDataService;
 
     @Autowired
-    private InteractionService uiService;
+    private AdvertService advertService;
 
     @Resource(name = "params")
     private Map<String, String> params;
 
     private static ApplicationContext staticContext;
+    private boolean isPrefiltrationEnabled;
 
     public Stage loadMain(Stage stage) {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
@@ -101,7 +105,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         progressGif.setImage(i);
         progressGif.setVisible(false);
         startButton.setText("Start");
-        startEventHandler = new StartEventHandler(startButton, progressGif, tabs, output, uiService, service);
+        startEventHandler = new StartEventHandler(startButton, progressGif, tabs, output, advertService, generateDataService);
         startButton.setOnAction(startEventHandler);
         Button loadFromDB = new Button("Load From DB");
         loadFromDB.setOnAction(actionEvent -> Platform.exit());
@@ -161,9 +165,16 @@ public class SpringStageLoader implements ApplicationContextAware {
         numberCol.setSortable(false);
 
         // столбец
-        TableColumn<AdvertDto, String> idColumn = new TableColumn<>("Id");
-        idColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getId()));
-        idColumn.prefWidthProperty().set(50);
+//        TableColumn<AdvertDto, String> idColumn = new TableColumn<>("Id");
+//        idColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getId()));
+//        idColumn.prefWidthProperty().set(50);
+
+        // столбец
+        TableColumn<AdvertDto, Boolean> saveColumn = new TableColumn<>("Save");
+        saveColumn.setCellFactory(tc -> new CheckBoxTableCell<AdvertDto, Boolean>());
+
+        saveColumn.setCellValueFactory(cellData -> cellData.getValue().getSave());
+        saveColumn.prefWidthProperty().set(50);
 
         // столбец
         TableColumn<AdvertDto, Boolean> isViewedColumn = new TableColumn<>("Viewed");
@@ -174,7 +185,7 @@ public class SpringStageLoader implements ApplicationContextAware {
                     @Override
                     public void updateItem(Boolean item, boolean empty) {
                         boolean a = item == null ? false : item;
-                        Double opacity = a ? 0.3 : 1.0;
+                        Double opacity = a ? OPACITY : 1.0;
                         super.updateItem(item, empty);
                         if (getTableRow() != null) {
                             //getTableRow().setOpacity(opacity);
@@ -188,14 +199,7 @@ public class SpringStageLoader implements ApplicationContextAware {
             }
         });
 
-        isViewedColumn.setCellValueFactory(cellData -> {
-            AdvertDto advert = cellData.getValue();
-            // Add listener to handler change
-            advert.getViewed().addListener((observable, oldValue, newValue) -> {
-                advert.getViewed().setValue(newValue.booleanValue());
-            });
-            return advert.getViewed();
-        });
+        isViewedColumn.setCellValueFactory(cellData -> cellData.getValue().getViewed());
         isViewedColumn.prefWidthProperty().set(50);
 
         // столбец
@@ -220,7 +224,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         textColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getText()));
         textColumn.prefWidthProperty().set(300);
 
-        t.getColumns().addAll(numberCol, idColumn, isViewedColumn, linkColumn, priceColumn, descriptionColumn, textColumn);
+        t.getColumns().addAll(numberCol, saveColumn, isViewedColumn, linkColumn, priceColumn, descriptionColumn, textColumn);
     }
 
     public void configureOutputTextArea() {
@@ -289,6 +293,19 @@ public class SpringStageLoader implements ApplicationContextAware {
         startEveryB.setSpacing(10);
         startEveryB.getChildren().addAll(startEvery, startEveryL, startEveryTF, startEveryTFL);
 
+        CheckBox prefiltration = new CheckBox();
+        prefiltration.setOnAction(actionEvent -> {
+            if (prefiltration.isSelected()) {
+                isPrefiltrationEnabled = true;
+            } else {
+                isPrefiltrationEnabled = false;
+            }
+        });
+        Label prefiltrationL = new Label("Prefiltration");
+        HBox prefiltrationB = new HBox();
+        prefiltrationB.setSpacing(10);
+        prefiltrationB.getChildren().addAll(prefiltration, prefiltrationL);
+
         CheckBox observation = new CheckBox();
         observation.setOnAction(actionEvent -> {
             if (observation.isSelected()) {
@@ -322,7 +339,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         clearDBB.getChildren().addAll(clearDB, clearDBL, clearDBTF, clearDBTFL);
         clearDBB.setDisable(true);
 
-        columnB.getChildren().addAll(priceB, saveToBDB, startEveryB, observationB, showXStringsB, clearDBB);
+        columnB.getChildren().addAll(priceB, saveToBDB, startEveryB, prefiltrationB, observationB, showXStringsB, clearDBB);
     }
 
     private void configureTextField(String property, TextField textField) {

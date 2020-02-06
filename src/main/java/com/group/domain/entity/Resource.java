@@ -14,6 +14,8 @@ import java.util.Map;
 public class Resource {
     @JsonProperty("id")
     private Long id;
+    @JsonProperty("parentId")
+    private Long parentId;
     @JsonProperty("url")
     private String url;
     @JsonProperty("prefix")
@@ -23,7 +25,8 @@ public class Resource {
     private List<Filter> filters;
 
     public Resource() {
-        this.id = Long.valueOf(0);
+        this.id = 0L;
+        this.parentId = 0L;
         this.url = "";
         this.prefix = "";
         this.locators = new HashMap<>();
