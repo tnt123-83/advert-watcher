@@ -242,8 +242,8 @@ public class GenerateDataServiceImpl implements GenerateDataService {
         Set<String> links = new HashSet<>();
         //Map<String, String> linkToPriceMap = new HashMap<>();
         try {
-            boolean isPrefiltrationEnabled = true;
-            links = getLinksFromPage(isPrefiltrationEnabled, res);
+            //boolean isPrefiltrationEnabled = true;
+            links = getLinksFromPage(Boolean.parseBoolean(params.get("isPrefiltrationEnabled")), res);
 
             for (String url : links) {
                 if (isWorkingTaskCancelled) break;

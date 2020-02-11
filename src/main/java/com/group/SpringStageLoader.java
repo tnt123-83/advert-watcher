@@ -66,7 +66,6 @@ public class SpringStageLoader implements ApplicationContextAware {
     private static TextField startEveryTF = new TextField();
 
     private final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-    private ScheduledFuture<?> clickStartButtonHandleTask;
     private StartEventHandler startEventHandler;
 
     @Autowired
@@ -79,7 +78,6 @@ public class SpringStageLoader implements ApplicationContextAware {
     private Map<String, String> params;
 
     private static ApplicationContext staticContext;
-    private boolean isPrefiltrationEnabled;
 
     public Stage loadMain(Stage stage) {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
@@ -259,6 +257,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         saveToBDB.setDisable(true);
 
         CheckBox startEvery = new CheckBox();
+
         ScheduledService<Void> scheduledService = new ScheduledService<Void>() {
             @Override
             protected Task<Void> createTask() {
@@ -294,13 +293,9 @@ public class SpringStageLoader implements ApplicationContextAware {
         startEveryB.getChildren().addAll(startEvery, startEveryL, startEveryTF, startEveryTFL);
 
         CheckBox prefiltration = new CheckBox();
-        prefiltration.setOnAction(actionEvent -> {
-            if (prefiltration.isSelected()) {
-                isPrefiltrationEnabled = true;
-            } else {
-                isPrefiltrationEnabled = false;
-            }
-        });
+        prefiltration.setSelected("true".equals(params.get("isPrefiltrationEnabled")));
+        prefiltration.setOnAction(actionEvent ->
+                params.put("isPrefiltrationEnabled", Boolean.toString(prefiltration.isSelected())));
         Label prefiltrationL = new Label("Prefiltration");
         HBox prefiltrationB = new HBox();
         prefiltrationB.setSpacing(10);

@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaTransactionManager;
@@ -22,8 +23,8 @@ import java.util.Properties;
 
 @Configuration
 @ComponentScan("com.group")
-@PropertySource("classpath:application.properties")
-@PropertySource("classpath:run.properties")
+@PropertySource("file:src/main/resources/application.properties")
+@PropertySource("file:src/main/resources/run.properties")
 @EnableJpaRepositories("com.group.repository")
 public class JavaConfig {
     private static final String PROP_DATABASE_DRIVER = "db.driver";
@@ -73,7 +74,8 @@ public class JavaConfig {
     @Bean(name = "params")
     public static PropertiesFactoryBean mapper() {
         PropertiesFactoryBean bean = new PropertiesFactoryBean();
-        bean.setLocation(new ClassPathResource("run.properties"));
+        //bean.setLocation(new ClassPathResource("run.properties"));
+        bean.setLocation(new FileSystemResource("src/main/resources/run.properties"));
         return bean;
     }
 
