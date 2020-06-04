@@ -13,7 +13,7 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AdvertDto {
-    private Integer id;
+    private Long id;
     private String siteId;
     private String url;
     private String title;

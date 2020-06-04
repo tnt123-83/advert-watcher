@@ -1,12 +1,11 @@
 package com.group.service;
 
-import com.group.domain.entity.Advert;
 import com.group.dto.AdvertDto;
 
 import java.util.List;
 
 public interface AdvertService {
-    AdvertDto find(Integer id);
+    AdvertDto find(Long id);
 
     List<AdvertDto> findAll();
 
@@ -14,7 +13,7 @@ public interface AdvertService {
 
     AdvertDto create(AdvertDto advert);
 
-    void delete(Integer id);
+    void delete(Long id);
 
     void deleteAll();
 
