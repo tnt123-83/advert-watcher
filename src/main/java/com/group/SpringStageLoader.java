@@ -3,12 +3,12 @@ package com.group;
 import com.group.dto.AdvertDto;
 import com.group.service.AdvertService;
 import com.group.service.GenerateDataService;
-import com.group.service.ui.InteractionService;
 import com.group.util.HyperlinkCell;
 import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.beans.property.ReadOnlyObjectWrapper;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.ObservableList;
 import javafx.concurrent.ScheduledService;
 import javafx.concurrent.Task;
 import javafx.geometry.Insets;
@@ -37,11 +37,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 
 @Component
 public class SpringStageLoader implements ApplicationContextAware {
@@ -60,7 +58,7 @@ public class SpringStageLoader implements ApplicationContextAware {
     private static VBox columnA = new VBox();
     private static VBox columnB = new VBox();
 
-    private static TabPane tabs = new TabPane();
+    private static TabPane tabPane = new TabPane();
     private static TextArea output = new TextArea();
     private static Button startButton = new Button();
     private static TextField startEveryTF = new TextField();
@@ -103,10 +101,10 @@ public class SpringStageLoader implements ApplicationContextAware {
         progressGif.setImage(i);
         progressGif.setVisible(false);
         startButton.setText("Start");
-        startEventHandler = new StartEventHandler(startButton, progressGif, tabs, output, advertService, generateDataService);
+        startEventHandler = new StartEventHandler(startButton, progressGif, tabPane, output, advertService, generateDataService);
         startButton.setOnAction(startEventHandler);
         Button loadFromDB = new Button("Load From DB");
-        loadFromDB.setOnAction(actionEvent -> Platform.exit());
+        loadFromDB.setOnAction(action -> restoreAdvertsFromDB(tabPane));
         Button exit = new Button("Exit");
         exit.setOnAction(actionEvent -> Platform.exit());
         bottomBox.setAlignment(Pos.CENTER_LEFT);
@@ -124,7 +122,7 @@ public class SpringStageLoader implements ApplicationContextAware {
 
         configureOutputTextArea();
 
-        columnA.getChildren().addAll(tabs, output);
+        columnA.getChildren().addAll(tabPane, output);
     }
 
     private void configureTabs() {
@@ -132,7 +130,18 @@ public class SpringStageLoader implements ApplicationContextAware {
         configureTable(table);
         Tab tab = new Tab();
         tab.setContent(table);
-        tabs.getTabs().add(tab);
+        tabPane.getTabs().add(tab);
+        if ("true".equals(params.get("isRestoreOnStartEnabled"))) {
+            restoreAdvertsFromDB(tabPane);
+        }
+    }
+
+    private void restoreAdvertsFromDB(TabPane tabPane) {
+        Map<String, ObservableList<AdvertDto>> mapTabNameToItems = new HashMap<>();
+        tabPane.getTabs().removeAll(tabPane.getTabs());
+        List<AdvertDto> all = advertService.findAll();
+        all.forEach(a -> StartEventHandler.distributeAdvertsByTabs(a, tabPane, mapTabNameToItems, advertService));
+        generateDataService.setFoundAdverts(new HashSet<>(all));
     }
 
     public static void configureTable(TableView t) {
@@ -202,7 +211,8 @@ public class SpringStageLoader implements ApplicationContextAware {
 
         // столбец
         TableColumn<AdvertDto, Hyperlink> linkColumn = new TableColumn<>("Link");
-        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(new Hyperlink(v.getValue().getUrl())));
+        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(new Hyperlink(v.getValue().getUrl()
+                .replaceFirst("https://", ""))));
         HyperlinkCell.setHostServices(hostServices);
         linkColumn.setCellFactory(new HyperlinkCell());
         linkColumn.prefWidthProperty().set(120);
@@ -213,16 +223,21 @@ public class SpringStageLoader implements ApplicationContextAware {
         priceColumn.prefWidthProperty().set(70);
 
         // столбец
+        TableColumn<AdvertDto, Integer> locationColumn = new TableColumn<>("Location");
+        locationColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getLocation()));
+        locationColumn.prefWidthProperty().set(50);
+
+        // столбец
         TableColumn<AdvertDto, Integer> descriptionColumn = new TableColumn<>("Description");
         descriptionColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getDescription()));
-        descriptionColumn.prefWidthProperty().set(80);
+        descriptionColumn.prefWidthProperty().set(50);
 
         // столбец
         TableColumn<AdvertDto, Integer> textColumn = new TableColumn<>("Text");
         textColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(v.getValue().getText()));
         textColumn.prefWidthProperty().set(300);
 
-        t.getColumns().addAll(numberCol, saveColumn, isViewedColumn, linkColumn, priceColumn, descriptionColumn, textColumn);
+        t.getColumns().addAll(numberCol, saveColumn, isViewedColumn, linkColumn, priceColumn, locationColumn, descriptionColumn, textColumn);
     }
 
     public void configureOutputTextArea() {
@@ -273,7 +288,6 @@ public class SpringStageLoader implements ApplicationContextAware {
         startEvery.setOnAction(actionEvent -> {
             if (startEvery.isSelected()) {
                 scheduledService.setOnSucceeded(e -> {
-                    System.out.println(startEventHandler.isTaskFinished());
                     if (startEventHandler.isTaskFinished()) startEventHandler.handle(null);
                 });
                 scheduledService.setPeriod(Duration.minutes(Integer.parseInt(startEveryTF.getText())));
@@ -301,18 +315,14 @@ public class SpringStageLoader implements ApplicationContextAware {
         prefiltrationB.setSpacing(10);
         prefiltrationB.getChildren().addAll(prefiltration, prefiltrationL);
 
-        CheckBox observation = new CheckBox();
-        observation.setOnAction(actionEvent -> {
-            if (observation.isSelected()) {
-
-            } else {
-
-            }
-        });
-        Label observationL = new Label("Observation");
-        HBox observationB = new HBox();
-        observationB.setSpacing(10);
-        observationB.getChildren().addAll(observation, observationL);
+        CheckBox restoreOnStart = new CheckBox();
+        restoreOnStart.setSelected("true".equals(params.get("isRestoreOnStartEnabled")));
+        restoreOnStart.setOnAction(actionEvent ->
+                params.put("isRestoreOnStartEnabled", Boolean.toString(restoreOnStart.isSelected())));
+        Label restoreOnStartL = new Label("Restore on Start");
+        HBox restoreOnStartB = new HBox();
+        restoreOnStartB.setSpacing(10);
+        restoreOnStartB.getChildren().addAll(restoreOnStart, restoreOnStartL);
 
         CheckBox showXStrings = new CheckBox();
         Label showXStringsL = new Label("Show");
@@ -326,15 +336,16 @@ public class SpringStageLoader implements ApplicationContextAware {
 
         CheckBox clearDB = new CheckBox();
         Label clearDBL = new Label("Clear DB to");
+        clearDB.setOnAction(action -> advertService.deleteAll());
         TextField clearDBTF = new TextField();
         clearDBTF.setPrefColumnCount(3);
         Label clearDBTFL = new Label("strings");
         HBox clearDBB = new HBox();
         clearDBB.setSpacing(10);
         clearDBB.getChildren().addAll(clearDB, clearDBL, clearDBTF, clearDBTFL);
-        clearDBB.setDisable(true);
+        clearDBB.setDisable(false);
 
-        columnB.getChildren().addAll(priceB, saveToBDB, startEveryB, prefiltrationB, observationB, showXStringsB, clearDBB);
+        columnB.getChildren().addAll(priceB, saveToBDB, startEveryB, prefiltrationB, restoreOnStartB, showXStringsB, clearDBB);
     }
 
     private void configureTextField(String property, TextField textField) {

@@ -18,9 +18,10 @@ public class Advert {
     @Id
     @GeneratedValue
     @Column(name = "ID", unique = true, nullable = false, length = 20)
-    private Long id;
+    private Integer id;
 
-    @Column(name = "SITE_ID", unique = true, length = 30)
+    //@Column(name = "SITE_ID", unique = true, length = 30)
+    @Column(name = "SITE_ID", length = 30)
     private String siteId;
 
     @Column(name = "URL", unique = true)
@@ -53,7 +54,10 @@ public class Advert {
     @Column(name = "SAVE")
     private boolean save;
 
-    public Advert(Long id) {
+    @Column(name = "GROUP_NAME")
+    private String groupName;
+
+    public Advert(Integer id) {
         this.id = id;
     }
 }

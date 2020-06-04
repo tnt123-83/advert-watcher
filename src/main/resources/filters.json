@@ -3,25 +3,24 @@
     "groupName": "Гаражи",
     "resourceIds": ["1","2"],
     "contains": {
-      "price":"30000..80000",
-      "message":""
+      "price":"20000..80000",
+      "text": "Жигули"
     },
     "color":"green"
   },
   {
-    "groupName": "Гаражи",
-    "resourceIds": ["2"],
+    "groupName": "Роутер",
+    "resourceIds": ["3"],
     "contains": {
-      "price": "30000..80000",
-      "message": "Полярная"
+      "price": "500..1100"
     },
     "color":"red"
   },
   {
     "groupName": "Ноуты",
-    "resourceIds": ["6", "7", "8", "9"],
+    "resourceIds": ["6"],
     "contains": {
-      "price":"7000..11000",
+      "price":"5000..9000",
       "message":""
     },
     "color":"green"
@@ -30,7 +29,7 @@
     "groupName": "Память",
     "resourceIds": ["4"],
     "contains": {
-      "price": "900..1300",
+      "price": "800..1300",
       "message": ""
     },
     "color":"red"
@@ -39,8 +38,17 @@
     "groupName": "Память",
     "resourceIds": ["5"],
     "contains": {
-      "price": "1900..2800",
+      "price": "1600..2800",
       "message": ""
+    },
+    "color":"red"
+  },
+  {
+    "groupName": "Комната",
+    "resourceIds": [11],
+    "contains": {
+      "price": "70000..300000",
+      "text": "Алексеевская"
     },
     "color":"red"
   }

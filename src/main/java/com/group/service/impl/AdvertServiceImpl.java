@@ -1,6 +1,7 @@
 package com.group.service.impl;
 
 import com.group.converter.AdvertConverter;
+import com.group.domain.entity.Advert;
 import com.group.dto.AdvertDto;
 import com.group.exception.ObjectNotFoundException;
 import com.group.repository.AdvertRepository;
@@ -22,7 +23,7 @@ public class AdvertServiceImpl implements AdvertService {
     }
 
     @Override
-    public AdvertDto find(Long id) {
+    public AdvertDto find(Integer id) {
         return repository.findById(id).map(converter::toDto)
                 .orElseThrow(() -> new ObjectNotFoundException(AdvertDto.class, id));
     }
@@ -43,23 +44,32 @@ public class AdvertServiceImpl implements AdvertService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(Integer id) {
         repository.deleteById(id);
     }
 
     @Override
+    public void deleteAll() {
+        repository.deleteAll();
+    }
+
+    @Override
     public AdvertDto update(AdvertDto dto) {
-        repository.findById(dto.getId())
-                .orElseThrow(() -> new ObjectNotFoundException(AdvertDto.class, dto.getId()));
+//        repository.findById(dto.getId())
+//                .orElseThrow(() -> new ObjectNotFoundException(AdvertDto.class, dto.getId()));
         return converter.toDto(repository.save(converter.toEntity(dto)));
     }
 
     @Override
-    public void update(AdvertDto advertDto, boolean createOrDelete) {
+    public void update(AdvertDto dto, boolean createOrDelete) {
         if (createOrDelete) {
-            create(advertDto);
+            //create(advertDto);
+            Advert advert = converter.toEntity(dto);
+            repository.insert(advert.getSiteId(), advert.getUrl(), advert.getTitle(), advert.getDescription(),
+                    advert.getText(), advert.getPrice(), advert.getDate(), advert.getLocation(), advert.getFromAgent(), advert.isViewed(),
+                    advert.isSave(), advert.getGroupName());
         } else {
-            findByUrl(advertDto.getUrl()).forEach(a -> delete(a.getId()));
+            findByUrl(dto.getUrl()).forEach(a -> delete(a.getId()));
         }
     }
 }

@@ -31,7 +31,12 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     private final Counter latch = new Counter(0);
     private final ArrayDeque<AdvertDto> queue = new ArrayDeque<>();
     private final Set<AdvertDto> tempFoundAdverts = new HashSet<>();
-    private final Set<AdvertDto> foundAdverts = new HashSet<>();
+
+    public void setFoundAdverts(Set<AdvertDto> foundAdverts) {
+        this.foundAdverts = foundAdverts;
+    }
+
+    private Set<AdvertDto> foundAdverts = new HashSet<>();
 
     private Boolean isWorkingTaskCancelled = false;
 
@@ -209,7 +214,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     }
 
     private boolean processDoesTextSatisfyCondition(String value, String condition) {
-        if ("skip!".equals("value")) return true;
+        if ("skip!".equals(value)) return true;
         if (condition.trim().startsWith("regexp: ")) {
             String regexp = condition.replace("regexp: ", "");
             Pattern p = Pattern.compile(regexp);
@@ -289,7 +294,9 @@ public class GenerateDataServiceImpl implements GenerateDataService {
                     //a.setPrice(e.selectFirst(res.getLocators().get("preview-price")).text());
                     //a.setPrice(applyDetailsRegExp(e.selectFirst(res.getLocators().get("preview-price")).text(), res));
                     a.setLocation(e.selectFirst(res.getLocators().get("preview-location")).text());
+                    a.setTitle(e.selectFirst(res.getLocators().get("preview-title")).text());
                     a.setDescription("skip!");
+                    a.setText("skip!");
                     //a.setDate(e.selectFirst(res.getLocators().get("preview-price")).text());
                     if (filterData(res.getFilters(), a)) {
                         result.add(a.getUrl());

@@ -3,7 +3,6 @@ package com.group;
 import com.group.dto.AdvertDto;
 import com.group.service.AdvertService;
 import com.group.service.GenerateDataService;
-import com.group.service.ui.InteractionService;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -21,7 +20,7 @@ import java.util.Map;
 public class StartEventHandler implements EventHandler<ActionEvent> {
     private Button button;
     private ImageView progressGif;
-    private final TabPane tabs;
+    private final TabPane tabPane;
     private TextArea output;
     private GenerateDataService service;
     private AdvertService advertService;
@@ -32,7 +31,7 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
                       GenerateDataService service) {
         this.button = button;
         this.progressGif = progressGif;
-        this.tabs = tabs;
+        this.tabPane = tabs;
         this.output = output;
         this.advertService = advertService;
         this.service = service;
@@ -50,9 +49,9 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
             button.setText("Start");
             progressGif.setVisible(false);
         } else {
-            tabs.getTabs().removeAll(tabs.getTabs());
+            tabPane.getTabs().removeAll(tabPane.getTabs());
             mapTabNameToItems.clear();
-            service.getResultTablesNames().forEach(name -> createTabWithNameAndAddToMap(name, mapTabNameToItems, tabs));
+            service.getResultTablesNames().forEach(name -> createTabWithNameAndAddToMap(name, mapTabNameToItems, tabPane));
             button.setText("Stop");
             progressGif.setVisible(true);
             service.setWorkingTaskCancelled(false);
@@ -70,30 +69,35 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
         workingTask.getPartialResults().addListener((ListChangeListener<AdvertDto>) c -> {
             while (c.next()) {
                 for (AdvertDto additem : c.getAddedSubList()) {
-                    additem.getSave().addListener((observable, oldValue, newValue) -> {
-                        additem.getSave().setValue(newValue.booleanValue());
-                        advertService.update(additem, newValue.booleanValue());
-                    });
-                    additem.getViewed().addListener((observable, oldValue, newValue) -> {
-                        additem.getViewed().setValue(newValue.booleanValue());
-                    });
-
-                    if (mapTabNameToItems.containsKey(additem.getFilter().getGroupName())) {
-                        if (additem.getViewed().getValue()) {
-                            mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);
-                        } else {
-                            mapTabNameToItems.get(additem.getFilter().getGroupName()).add(0, additem);
-                        }
-                    } else {
-                        createTabWithNameAndAddToMap(additem.getFilter().getGroupName(), mapTabNameToItems, tabs);
-                        mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);
-                    }
+                    distributeAdvertsByTabs(additem, tabPane, mapTabNameToItems, advertService);
                 }
             }
         });
     }
 
-    private void createTabWithNameAndAddToMap(String name, Map<String, ObservableList<AdvertDto>> mapTabNameToItems, TabPane tabs) {
+    public static void distributeAdvertsByTabs(AdvertDto additem, TabPane tabPane, Map<String,
+            ObservableList<AdvertDto>> mapTabNameToItems, AdvertService advertService) {
+        additem.getSave().addListener((observable, oldValue, newValue) -> {
+            additem.getSave().setValue(newValue.booleanValue());
+            advertService.update(additem, newValue.booleanValue());
+        });
+        additem.getViewed().addListener((observable, oldValue, newValue) -> {
+            additem.getViewed().setValue(newValue.booleanValue());
+        });
+
+        if (mapTabNameToItems.containsKey(additem.getFilter().getGroupName())) {
+            if (additem.getViewed().getValue()) {
+                mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);
+            } else {
+                mapTabNameToItems.get(additem.getFilter().getGroupName()).add(0, additem);
+            }
+        } else {
+            createTabWithNameAndAddToMap(additem.getFilter().getGroupName(), mapTabNameToItems, tabPane);
+            mapTabNameToItems.get(additem.getFilter().getGroupName()).add(additem);
+        }
+    }
+
+    private static void createTabWithNameAndAddToMap(String name, Map<String, ObservableList<AdvertDto>> mapTabNameToItems, TabPane tabPane) {
         if (mapTabNameToItems.containsKey(name)) return;
         mapTabNameToItems.put(name, FXCollections.observableArrayList(new ArrayList()));
         Tab tab = new Tab(name);
@@ -101,6 +105,6 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
         SpringStageLoader.configureTable(t);
         t.setItems(mapTabNameToItems.get(name));
         tab.setContent(t);
-        tabs.getTabs().add(tab);
+        tabPane.getTabs().add(tab);
     }
 }

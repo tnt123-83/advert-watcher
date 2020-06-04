@@ -4,12 +4,12 @@
     "url":"https://www.olx.ua/nedvizhimost/garazhy-parkovki/prodazha-garazhey-parkovok/kharkov/?search%5Border%5D=filter_float_price%3Aasc&search%5Bdistrict_id%5D=67",
     "locators": {
       "preview-container": "table[id=offers_table] tr td table",
-      "preview-link": "tr td[class=title-cell] a",
+      "preview-link": "tr td[class*=title-cell] a",
       "preview-link-attr": "href",
-      "preview-title": "td[class=title-cell] a",
-      "preview-price" : "tr td[class*=td-price] p[class=price]",
-      "preview-location" : "tr td[class=bottom-cell] small:nth-child(1) span",
-      "preview-date" : "tr td[class=bottom-cell] small:nth-child(2) span",
+      "preview-title": "td[class*=title-cell] a",
+      "preview-price": "tr td[class*=td-price] p[class=price]",
+      "preview-location": "tr td[class=bottom-cell] small:nth-child(1) span",
+      "preview-date": "tr td[class=bottom-cell] small:nth-child(2) span",
       "nextPage": "a[data-cy=page-link-next]",
       "nextPage-container": "href",
       "siteId": "div[class=offer-titlebox__details] small",
@@ -17,28 +17,28 @@
       "siteId-details": "regexp: ",
       "title": "div[class=offer-titlebox] h1",
       "title-container": "text",
-      "description": "div[class=offer-titlebox__details] a[class=show-map-link]",
+      "description": "div[class=offer-titlebox] h1",
       "description-container": "text",
       "text": "div[id=textContent]",
       "text-container": "text",
-      "price": "div[class=price-label]",
+      "price": "div[class=pricelabel] strong[class*=pricelabel__value]",
       "price-container": "text",
       "price-details": "regexp: \\D*(\\d+[\\d|\\s]*\\d*\\$?)\\D*",
       "date": "div[class=offer-titlebox__details] em",
       "date-container": "text",
       "date-details": "regexp: ",
-      "location": "div[class=offer-titlebox__details] a[class=show-map-link]",
+      "location": "div[class=offer-user__address] address p",
       "location-container": "text",
       "location-details": "regexp: ",
-      "fromAgent": "div[class=clr descriptioncontent marginbott20]",
+      "fromAgent": "div[class*=marginbott20] strong[class=offer-details__value]",
       "fromAgent-container": "text",
-      "fromAgent-details": "regexp: .*Объявление от (.*) Тип недвижимости.*"
+      "fromAgent-details": "regexp: "
     }
   },
   {
-    "id":"3",
-    "parentId":"1",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/noutbuki/q-8130u/?search%5Border%5D=filter_float_price%3Aasc"
+  "id":"3",
+  "parentId":"1",
+  "url":"https://www.olx.ua/list/q-RB951G/?search%5Border%5D=filter_float_price%3Aasc"
   },
   {
     "id":"4",
@@ -58,22 +58,18 @@
   {
     "id":"7",
     "parentId":"1",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8350U/?search%5Border%5D=filter_float_price%3Aasc"
+    "url":"https://www.olx.ua/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/kharkov/?search%5Border%5D=filter_float_price%3Aasc&search%5Bdistrict_id%5D=67",
+    "locators": {
+      "location-details": "regexp:.*, (\\S*)$"
+    }
   },
   {
-    "id":"8",
+    "id":"11",
     "parentId":"1",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8550U/?search%5Border%5D=filter_float_price%3Aasc"
-  },
-  {
-    "id":"9",
-    "parentId":"1",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8565U/?search%5Border%5D=filter_float_price%3Aasc"
-  },
-  {
-    "id":"10",
-    "parentId":"1",
-    "url":"https://www.olx.ua/elektronika/noutbuki-i-aksesuary/q-8565U/?search%5Border%5D=filter_float_price%3Aasc"
+    "url":"https://www.olx.ua/nedvizhimost/kvartiry-komnaty/prodazha-kvartir-komnat/kharkov/?search%5Border%5D=filter_float_price%3Aasc&search%5Bdistrict_id%5D=67",
+    "locators": {
+      "location-details": "regexp:.*, (\\S*)$"
+    }
   },
   {
     "id":"2",

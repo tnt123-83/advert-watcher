@@ -11,7 +11,7 @@ public class ObjectNotFoundException extends RuntimeException {
         super(message);
     }
 
-    public ObjectNotFoundException(Class objectClass, Long id) {
+    public ObjectNotFoundException(Class objectClass, Integer id) {
         this(String.format(OBJECT_NOT_FOUND_MESSAGE, objectClass.getSimpleName(), id));
     }
 

@@ -1,14 +1,13 @@
 package com.group;
 
+import org.apache.commons.dbcp2.BasicDataSource;
 import org.hibernate.jpa.HibernatePersistenceProvider;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.PropertiesFactoryBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
@@ -18,7 +17,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 
 import javax.annotation.Resource;
 import javax.sql.DataSource;
-import java.util.Map;
 import java.util.Properties;
 
 @Configuration
@@ -31,6 +29,7 @@ public class JavaConfig {
     private static final String PROP_DATABASE_PASSWORD = "db.password";
     private static final String PROP_DATABASE_URL = "db.url";
     private static final String PROP_DATABASE_USERNAME = "db.username";
+    private static final String PROP_MAX_ACTIVE = "db.connection.maxActive";
     private static final String PROP_HIBERNATE_DIALECT = "hibernate.dialect";
     private static final String PROP_HIBERNATE_SHOW_SQL = "hibernate.show_sql";
     private static final String PROP_ENTITYMANAGER_PACKAGES_TO_SCAN = "entitymanager.packages.to.scan";
@@ -41,12 +40,18 @@ public class JavaConfig {
 
     @Bean
     public DataSource dataSource() {
+        //BasicDataSource dataSource = new BasicDataSource();
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
         dataSource.setDriverClassName(env.getRequiredProperty(PROP_DATABASE_DRIVER));
         dataSource.setUrl(env.getRequiredProperty(PROP_DATABASE_URL));
         dataSource.setUsername(env.getRequiredProperty(PROP_DATABASE_USERNAME));
         dataSource.setPassword(env.getRequiredProperty(PROP_DATABASE_PASSWORD));
+        //dataSource.setConnectionProperties(getConnectionProperties());
+        //dataSource.setInitialSize(2);
+        //dataSource.setMinIdle(2);
+        //dataSource.setMaxTotal(2);
+        //dataSource.setMaxIdle(2);
 
         return dataSource;
     }
@@ -70,6 +75,16 @@ public class JavaConfig {
 
         return properties;
     }
+
+//    private Properties getConnectionProperties() {
+//        Properties properties = new Properties();
+//        //properties.put("maxActive", env.getRequiredProperty(PROP_MAX_ACTIVE));
+//        properties.setProperty("removeAbandoned", "true");
+//        properties.setProperty("initialSize", "1");
+//        properties.setProperty("maxActive", "1");
+//        properties.setProperty("minIdle", "1");
+//        return properties;
+//    }
 
     @Bean(name = "params")
     public static PropertiesFactoryBean mapper() {

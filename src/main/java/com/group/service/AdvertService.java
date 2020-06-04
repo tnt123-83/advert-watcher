@@ -6,7 +6,7 @@ import com.group.dto.AdvertDto;
 import java.util.List;
 
 public interface AdvertService {
-    AdvertDto find(Long id);
+    AdvertDto find(Integer id);
 
     List<AdvertDto> findAll();
 
@@ -14,7 +14,9 @@ public interface AdvertService {
 
     AdvertDto create(AdvertDto advert);
 
-    void delete(Long id);
+    void delete(Integer id);
+
+    void deleteAll();
 
     AdvertDto update(AdvertDto advert);
 
