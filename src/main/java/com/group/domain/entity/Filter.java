@@ -20,4 +20,6 @@ public class Filter {
     private String color;
     @JsonProperty("groupName")
     private String groupName;
+    @JsonProperty("isEnabled")
+    private boolean isEnabled = true;
 }

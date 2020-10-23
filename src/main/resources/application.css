@@ -1,0 +1,7 @@
+.new-advert {
+    -fx-text-background-color: blue;
+}
+
+.old-advert {
+    -fx-text-background-color: black;
+}

@@ -84,6 +84,9 @@ public class StartEventHandler implements EventHandler<ActionEvent> {
         additem.getViewed().addListener((observable, oldValue, newValue) -> {
             additem.getViewed().setValue(newValue.booleanValue());
         });
+        additem.getNew_().addListener((observable, oldValue, newValue) -> {
+            additem.getNew_().setValue(newValue.booleanValue());
+        });
 
         if (mapTabNameToItems.containsKey(additem.getFilter().getGroupName())) {
             if (additem.getViewed().getValue()) {

@@ -1,7 +1,6 @@
 package com.group.service.impl;
 
 import com.group.converter.AdvertConverter;
-import com.group.domain.entity.Advert;
 import com.group.dto.AdvertDto;
 import com.group.exception.ObjectNotFoundException;
 import com.group.repository.AdvertRepository;

@@ -100,7 +100,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     }
 
     private List<Resource> parseResources() {
-        byte[] mapData = new byte[0];
+        byte[] mapData;
         List<Resource> resources = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -123,9 +123,11 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     }
 
     private void copyParamsFromParent(Resource r, Map<Long, Resource> idToResourceMap) {
-        Map<String, String> locators = new HashMap<>(idToResourceMap.get(r.getParentId()).getLocators());
+        Resource parentResource = idToResourceMap.get(r.getParentId());
+        Map<String, String> locators = new HashMap<>(parentResource.getLocators());
         locators.putAll(r.getLocators());
         r.setLocators(locators);
+        r.setPrefix(parentResource.getPrefix());
     }
 
     public List<String> getResultTablesNames() {
@@ -133,7 +135,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
     }
 
     private List<Filter> parseFilters() {
-        byte[] mapData = new byte[0];
+        byte[] mapData;
         List<Filter> filters = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();
         try {
@@ -143,7 +145,7 @@ public class GenerateDataServiceImpl implements GenerateDataService {
             e.printStackTrace();
         }
         System.out.println("Array is: " + filters);
-        return filters;
+        return filters.stream().filter(f -> f.isEnabled()).collect(Collectors.toList());
     }
 
     private Boolean filterData(List<Filter> filters, AdvertDto advert) {
@@ -217,8 +219,8 @@ public class GenerateDataServiceImpl implements GenerateDataService {
         if ("skip!".equals(value)) return true;
         if (condition.trim().startsWith("regexp: ")) {
             String regexp = condition.replace("regexp: ", "");
-            Pattern p = Pattern.compile(regexp);
-            Matcher m = p.matcher(value);
+            Pattern p = Pattern.compile(regexp, Pattern.CASE_INSENSITIVE);
+            Matcher m = p.matcher(value.toLowerCase());
             return m.find();
         } else {
             String[] words = condition.toLowerCase().split(" ");
@@ -264,7 +266,12 @@ public class GenerateDataServiceImpl implements GenerateDataService {
                             }
                             if (shouldReturnNotViewedResults) {
                                 foundAdverts.forEach(a -> {
-                                    if (a.equals(advert)) advert.setViewed(a.getViewed());
+                                    if (a.equals(advert)) {
+                                        advert.setViewed(a.getViewed());
+                                        advert.setSave(a.getSave());
+                                        advert.setNew_(a.getNew_());
+
+                                    }
                                 });
                                 //if (advert.getViewed().get()) continue;
                             }
@@ -277,6 +284,11 @@ public class GenerateDataServiceImpl implements GenerateDataService {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void postProcessAdvert(AdvertDto advert) {
+        advert.setUrl("www." + advert.getUrl().replaceFirst("https://", "")
+                .replaceFirst("www.", ""));
     }
 
     private Set<String> getLinksFromPage(boolean isPrefiltrationEnabled, Resource res) throws IOException {
@@ -334,10 +346,12 @@ public class GenerateDataServiceImpl implements GenerateDataService {
             result.setDate(new Date());
             result.setLocation(parseValue(locators.get("location"), locators.get("location-container"), locators.get("location-details"), doc));
             result.setFromAgent(parseValue(locators.get("fromAgent"), locators.get("fromAgent-container"), locators.get("fromAgent-details"), doc));
+            result.getNew_().setValue(true);
             System.out.println(result);
         } catch (IOException e) {
             e.printStackTrace();
         }
+        postProcessAdvert(result);
         return result;
     }
 

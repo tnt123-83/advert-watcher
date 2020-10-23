@@ -26,6 +26,7 @@ public class AdvertDto {
     private Filter filter;
     private BooleanProperty viewed = new SimpleBooleanProperty();
     private BooleanProperty save = new SimpleBooleanProperty();
+    private BooleanProperty new_ = new SimpleBooleanProperty();
 
     public boolean equals(AdvertDto dto) {
         if (this.filter != null && this.filter.equals(dto.getFilter())

@@ -72,6 +72,14 @@
     }
   },
   {
+    "id":"12",
+    "parentId":"1",
+    "url":"https://www.olx.ua/kharkov/q-%D0%B1%D0%BE%D1%87%D0%BA%D0%B0/?search%5Border%5D=filter_float_price%3Aasc&search%5Bfilter_float_price%3Afrom%5D=10",
+    "locators": {
+      "location-details": "regexp:.*, (\\S*)$"
+    }
+  },
+  {
     "id":"2",
     "url":"https://besplatka.ua/kharkov/nedvizhimost/prodazha-garazhey-i-avtomest/shevchenkovskii-r-n?sort=price-z-a",
     "prefix":"https://besplatka.ua",
@@ -110,5 +118,10 @@
       "fromAgent-container":"text",
       "fromAgent-details":"regexp: .*Тип предложения: (От \\S+ка).*"
     }
+  },
+  {
+    "id":"13",
+    "parentId":"2",
+    "url":"https://besplatka.ua/kharkov/nedvizhimost/prodazha-komnat/shevchenkovskii-r-n?sort=price-z-a"
   }
 ]

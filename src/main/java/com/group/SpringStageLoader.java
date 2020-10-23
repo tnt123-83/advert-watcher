@@ -45,7 +45,7 @@ import java.util.concurrent.ScheduledExecutorService;
 public class SpringStageLoader implements ApplicationContextAware {
     private static Group root = new Group();
 
-    private static final int WIDTH = 1000;
+    public static final int WIDTH = 1000;
     private static final int HEIGHT = 600;
     private static final double OPACITY = 0.3;
 
@@ -79,6 +79,7 @@ public class SpringStageLoader implements ApplicationContextAware {
 
     public Stage loadMain(Stage stage) {
         Scene scene = new Scene(root, WIDTH, HEIGHT);
+        scene.getStylesheets().add("application.css");
         stage.setTitle(ADVERTS);
         stage.setScene(scene);
         stage.show();
@@ -148,18 +149,18 @@ public class SpringStageLoader implements ApplicationContextAware {
         //table config
         t.setEditable(true);
         t.setMaxSize(WIDTH * 3 / 4, HEIGHT * 2 / 3);
-        t.setRowFactory(new Callback() {
-            @Override
-            public Object call(Object rf) {
-                TableRow<AdvertDto> row = new TableRow<>();
-                row.setOnMouseClicked(event -> {
-                    if (event.getClickCount() == 2 && (!row.isEmpty())) {
-                        AdvertDetailsModalStage stage = new AdvertDetailsModalStage();
-                        stage.showDetails(row.getItem());
-                    }
-                });
-                return row;
-            }
+        t.setRowFactory((Callback) rf -> {
+            TableRow<AdvertDto> row = new TableRow<>();
+            System.out.println("cdddd");
+            row.setStyle("-fx-text-background-color: blue;");
+            row.setOnMouseClicked(event -> {
+                if (event.getClickCount() == 2 && (!row.isEmpty())) {
+                    AdvertDetailsModalStage stage = new AdvertDetailsModalStage();
+                    stage.showDetails(row.getItem());
+                }
+            });
+
+            return row;
         });
 
         // столбец
@@ -188,7 +189,7 @@ public class SpringStageLoader implements ApplicationContextAware {
         isViewedColumn.setCellFactory(new Callback<TableColumn<AdvertDto, Boolean>, TableCell<AdvertDto, Boolean>>() {
             @Override
             public TableCell<AdvertDto, Boolean> call(TableColumn<AdvertDto, Boolean> tc) {
-                CheckBoxTableCell<AdvertDto, Boolean> a = new CheckBoxTableCell<AdvertDto, Boolean>() {
+                return new CheckBoxTableCell<AdvertDto, Boolean>() {
                     @Override
                     public void updateItem(Boolean item, boolean empty) {
                         boolean a = item == null ? false : item;
@@ -202,7 +203,6 @@ public class SpringStageLoader implements ApplicationContextAware {
                         }
                     }
                 };
-                return a;
             }
         });
 
@@ -211,10 +211,55 @@ public class SpringStageLoader implements ApplicationContextAware {
 
         // столбец
         TableColumn<AdvertDto, Hyperlink> linkColumn = new TableColumn<>("Link");
-        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(new Hyperlink(v.getValue().getUrl()
-                .replaceFirst("https://", ""))));
+        linkColumn.setCellValueFactory(v -> new ReadOnlyObjectWrapper(new Hyperlink(v.getValue().getUrl())));
         HyperlinkCell.setHostServices(hostServices);
-        linkColumn.setCellFactory(new HyperlinkCell());
+        //linkColumn.setCellFactory(new HyperlinkCell());
+        linkColumn.setCellFactory(new Callback<TableColumn<AdvertDto, Hyperlink>, TableCell<AdvertDto, Hyperlink>>() {
+            @Override
+            public TableCell<AdvertDto, Hyperlink> call(TableColumn<AdvertDto, Hyperlink> arg) {
+
+                return new TableCell<AdvertDto, Hyperlink>() {
+                    private final Hyperlink hyperlink = new Hyperlink();
+                    {
+                        hyperlink.setOnMouseClicked(event -> {
+                            Hyperlink url = getItem();
+                            AdvertDto advert = getTableRow().getItem();
+                            advert.getNew_().setValue(false);
+                            if (getTableRow() != null) {
+                                getTableRow().setStyle("");
+                            }
+                            url.setVisited(true);
+
+                            //hostServices.showDocument(url.getText());
+                        });
+                    }
+
+                    @Override
+                    protected void updateItem(Hyperlink url, boolean empty) {
+                        //System.out.println(getTableRow().getItem());
+                        super.updateItem(url, empty);
+                        if (empty) {
+                            setGraphic(null);
+                        } else {
+                            //System.out.println(url.isVisited());
+                            if (!url.isVisited()) {
+                                hyperlink.setText(url.getText());
+                                setGraphic(hyperlink);
+                                if (getTableRow().getItem() != null) {
+                                    System.out.println(getTableRow().getItem().getPrice()+"  "+getTableRow().getItem().getNew_());
+                                    if (getTableRow().getItem().getNew_().get()) {
+                                        getTableRow().setStyle("-fx-text-background-color: blue;");
+                                    } else {
+                                        url.setVisited(true);
+                                        getTableRow().setStyle("");
+                                    }
+                                }
+                            }
+                        }
+                    }
+                };
+            }
+        });
         linkColumn.prefWidthProperty().set(120);
 
         // столбец

@@ -3,7 +3,6 @@ package com.group.converter;
 import com.group.domain.entity.Advert;
 import com.group.domain.entity.Filter;
 import com.group.dto.AdvertDto;
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +22,7 @@ public class AdvertConverter extends CustomConverter<Advert, AdvertDto> {
         AdvertDto advertDto = super.toDto(entity);
         advertDto.setViewed(new SimpleBooleanProperty(entity.isViewed()));
         advertDto.setSave(new SimpleBooleanProperty(entity.isSave()));
+        advertDto.setNew_(new SimpleBooleanProperty(true));
         Filter f = new Filter();
         f.setGroupName(entity.getGroupName());
         advertDto.setFilter(f);
